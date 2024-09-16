@@ -1,16 +1,21 @@
-develop:
-	pip install -e . --use-mirrors
-	make install-test-requirements
+develop: setup-git install-deps
 
-install-test-requirements:
-	pip install "file://`pwd`#egg=responses[tests]" --use-mirrors
+install-deps:
+	pip install -e "file://`pwd`#egg=responses[tests]"
+
+install-pre-commit:
+	pip install "pre-commit>=2.9.2"
+
+setup-git: install-pre-commit
+	pre-commit install
+	git config branch.autosetuprebase always
 
 test: develop lint
 	@echo "Running Python tests"
 	py.test .
 	@echo ""
 
-lint:
+lint: install-pre-commit
 	@echo "Linting Python files"
-	PYFLAKES_NODOCTEST=1 flake8 .
+	pre-commit run -a
 	@echo ""
